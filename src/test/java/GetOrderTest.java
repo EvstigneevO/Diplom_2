@@ -1,22 +1,23 @@
-import Steps.Ingredients;
-import Steps.Order;
-import Steps.User;
 import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Severity;
 import io.qameta.allure.SeverityLevel;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+import steps.Ingredients;
+import steps.Order;
+import steps.User;
 
 import java.util.List;
+import java.util.Map;
 
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.notNullValue;
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
+import static utils.UserGenerator.generateUserData;
 
 @Epic("Stellar Burgers")
 @Feature("Get orders")
@@ -28,11 +29,9 @@ public class GetOrderTest {
     String accessToken;
 
     private String createAndLoginUser() {
-        String username = RandomStringUtils.randomAlphabetic(10);
-        String password = RandomStringUtils.randomAlphabetic(10);
-        String email = RandomStringUtils.randomAlphabetic(10) + "@yandex.ru";
-        Response response = user.createUser(email, password, username);
-        user.loginUser(email, password);
+        Map<String, String> data = generateUserData();
+        Response response = user.createUser(data.get("email"), data.get("password"), data.get("username"));
+        user.loginUser(data.get("email"), data.get("password"));
         return response.path("accessToken");
     }
 
@@ -58,7 +57,7 @@ public class GetOrderTest {
     public void successfullyReceiveOrderListTest() {
         Response response = order.getOrders(accessToken);
         assertEquals("Неверный код ответа", 200, response.statusCode());
-        assertEquals("Невалидные данные в ответе: success", true, response.path("success"));
+        assertTrue("Невалидные данные в ответе: success", response.path("success"));
         assertThat("Заказа не существует", response.path("orders"), notNullValue());
     }
 
@@ -67,7 +66,7 @@ public class GetOrderTest {
     public void receiveOrderListWithoutAuthorizationTest() {
         Response response = order.getOrders("");
         assertEquals("Неверный код ответа", 401, response.statusCode());
-        assertEquals("Невалидные данные в ответе: success", false, response.path("success"));
+        assertFalse("Невалидные данные в ответе: success", response.path("success"));
         assertEquals("Невалидные данные в ответе: message", "You should be authorised", response.path("message"));
     }
 }

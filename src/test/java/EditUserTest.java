@@ -1,4 +1,4 @@
-import Steps.User;
+import steps.User;
 import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Severity;
@@ -10,10 +10,10 @@ import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
-import java.util.HashMap;
 import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
+import static utils.UserGenerator.generateUserData;
 
 @Epic("Stellar Burgers")
 @Feature("Edit User")
@@ -27,17 +27,10 @@ public class EditUserTest {
     }
 
     private Map<String, String> createData() {
-        String username = RandomStringUtils.randomAlphabetic(10);
-        String password = RandomStringUtils.randomAlphabetic(10);
-        String email = RandomStringUtils.randomAlphabetic(5) + "@yandex.ru";
-        Response response = user.createUser(email, password, username);
-        String token = response.path("accessToken");
-        Map<String, String> inputDataMap = new HashMap<>();
-        inputDataMap.put("email", email);
-        inputDataMap.put("password", password);
-        inputDataMap.put("name", username);
-        inputDataMap.put("accessToken", token);
-        return inputDataMap;
+        Map<String, String> data = generateUserData();
+        Response response = user.createUser(data.get("email"), data.get("password"), data.get("username"));
+        data.put("accessToken", response.path("accessToken"));
+        return data;
     }
 
     @Before
@@ -62,7 +55,7 @@ public class EditUserTest {
         Response response = user.editUser(data.get("email"), data.get("password"), newUsername, data.get("accessToken"));
         accessToken = data.get("accessToken");
         assertEquals("Неверный код ответа", 200, response.statusCode());
-        assertEquals("Невалидные данные в ответе: success", true, response.path("success"));
+        assertTrue("Невалидные данные в ответе: success", response.path("success"));
     }
 
     @Test
@@ -75,7 +68,7 @@ public class EditUserTest {
         Response response = user.editUser(data.get("email"), newPassword, data.get("name"), data.get("accessToken"));
         accessToken = data.get("accessToken");
         assertEquals("Неверный код ответа", 200, response.statusCode());
-        assertEquals("Невалидные данные в ответе: success", true, response.path("success"));
+        assertTrue("Невалидные данные в ответе: success", response.path("success"));
     }
 
     @Test
@@ -88,7 +81,7 @@ public class EditUserTest {
         Response response = user.editUser(newEmail, data.get("password"), data.get("name"), data.get("accessToken"));
         accessToken = data.get("accessToken");
         assertEquals("Неверный код ответа", 200, response.statusCode());
-        assertEquals("Невалидные данные в ответе: success", true, response.path("success"));
+        assertTrue("Невалидные данные в ответе: success", response.path("success"));
     }
 
     @Test
@@ -101,7 +94,7 @@ public class EditUserTest {
         Response response = user.editUser(data.get("email"), data.get("password"), newUsername, "");
         accessToken = data.get("accessToken");
         assertEquals("Неверный код ответа", 401, response.statusCode());
-        assertEquals("Невалидные данные в ответе: success", false, response.path("success"));
+        assertFalse("Невалидные данные в ответе: success", response.path("success"));
         assertEquals("Невалидные данные в ответе: message", "You should be authorised", response.path("message"));
     }
 
@@ -115,7 +108,7 @@ public class EditUserTest {
         Response response = user.editUser(data.get("email"), newPassword, data.get("name"), "");
         accessToken = data.get("accessToken");
         assertEquals("Неверный код ответа", 401, response.statusCode());
-        assertEquals("Невалидные данные в ответе: success", false, response.path("success"));
+        assertFalse("Невалидные данные в ответе: success", response.path("success"));
         assertEquals("Невалидные данные в ответе: message", "You should be authorised", response.path("message"));
     }
 
@@ -129,7 +122,7 @@ public class EditUserTest {
         Response response = user.editUser(newEmail, data.get("password"), data.get("name"), "");
         accessToken = data.get("accessToken");
         assertEquals("Неверный код ответа", 401, response.statusCode());
-        assertEquals("Невалидные данные в ответе: success", false, response.path("success"));
+        assertFalse("Невалидные данные в ответе: success", response.path("success"));
         assertEquals("Невалидные данные в ответе: message", "You should be authorised", response.path("message"));
     }
 }

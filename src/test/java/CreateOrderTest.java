@@ -1,20 +1,21 @@
-import Steps.Ingredients;
-import Steps.Order;
-import Steps.User;
+import steps.Ingredients;
+import steps.Order;
+import steps.User;
 import io.qameta.allure.Epic;
 import io.qameta.allure.Feature;
 import io.qameta.allure.Severity;
 import io.qameta.allure.SeverityLevel;
 import io.qameta.allure.junit4.DisplayName;
 import io.restassured.response.Response;
-import org.apache.commons.lang3.RandomStringUtils;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.util.List;
+import java.util.Map;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
+import static utils.UserGenerator.generateUserData;
 
 @Epic("Stellar Burgers")
 @Feature("Create order")
@@ -27,10 +28,8 @@ public class CreateOrderTest {
 
 
     private String getAccessTokenFromUser() {
-        String email = RandomStringUtils.randomAlphabetic(10) + "@yandex.ru";
-        String password = RandomStringUtils.randomAlphabetic(10);
-        String username = RandomStringUtils.randomAlphabetic(10);
-        return user.createUser(email, password, username).path("accessToken");
+        Map<String, String> data = generateUserData();
+        return user.createUser(data.get("email"), data.get("password"), data.get("username")).path("accessToken");
     }
 
     @Before
@@ -56,7 +55,7 @@ public class CreateOrderTest {
         List<String> ingredients = responseIngredients.path("data._id");
         Response response = order.createOrder(ingredients, accessToken);
         assertEquals("Неверный код ответа", 200, response.statusCode());
-        assertEquals("Невалидные данные в ответе: success", true, response.path("success"));
+        assertTrue("Невалидные данные в ответе: success", response.path("success"));
 
     }
 
@@ -68,7 +67,7 @@ public class CreateOrderTest {
         List<String> ingredients = responseIngredients.path("data._id");
         Response response = order.createOrder(ingredients, "");
         assertEquals("Неверный код ответа", 200, response.statusCode());
-        assertEquals("Невалидные данные в ответе: success", true, response.path("success"));
+        assertTrue("Невалидные данные в ответе: success", response.path("success"));
     }
 
     @Test
@@ -78,7 +77,7 @@ public class CreateOrderTest {
         accessToken = getAccessTokenFromUser();
         Response response = order.createOrder(null, accessToken);
         assertEquals("Неверный код ответа", 400, response.statusCode());
-        assertEquals("Невалидные данные в ответе: success", false, response.path("success"));
+        assertFalse("Невалидные данные в ответе: success", response.path("success"));
         assertEquals("Невалидные данные в ответе: message", "Ingredient ids must be provided", response.path("message"));
     }
 

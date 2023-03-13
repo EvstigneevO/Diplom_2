@@ -1,4 +1,4 @@
-package Steps;
+package steps;
 
 import io.qameta.allure.Step;
 import io.restassured.response.Response;
@@ -50,7 +50,7 @@ public class User {
                 .patch(USER_PATH + "user/");
     }
 
-    @Step("Удаление пользователя.")
+    @Step("Удаление пользователя")
     public ValidatableResponse deleteUser(String token) {
         return given()
                 .header("Authorization", token)
